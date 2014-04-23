@@ -1,0 +1,73 @@
+AKIAJUJBHRGCY5J7CMCA
+ogdWEQtk74QHzSBOOvOBBfbNP3a7u90rfWlTQ0+F
+
+
+packer build \
+    -var 'aws_access_key=AKIAJUJBHRGCY5J7CMCA' \
+    -var 'aws_secret_key=ogdWEQtk74QHzSBOOvOBBfbNP3a7u90rfWlTQ0+F' \
+    example.json
+
+
+
+    packer_amazon-ebs_aws.box is this a virtualbox or is it for aws,
+      i think only aws, because we didnt specify virtualbox anywhere, it is just vagrant
+
+
+
+
+
+
+
+
+
+      {
+  "builders": [
+    {
+
+    }
+  ],
+  "post-processors" : [
+    {
+      "type" : "vagrant",
+      "virtualbox" : {}
+    }
+  ]
+}
+
+
+
+
+
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<esc>",
+        " linux ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg",
+        "<enter>",
+        "<wait>"
+      ],
+      "boot_wait": "5s",
+      "disk_size": 8000,
+      "guest_os_type": "RedHat_64",
+      "headless": false,
+      "http_directory": "/Users/mdumont/projects/packer-demo",
+      "iso_checksum": "d717af33dd258945e6304f9955487017",
+      "iso_checksum_type": "md5",
+      "iso_url": "/Users/mdumont/Downloads/rhel-server-6.3-x86_64-dvd.iso",
+      "shutdown_command" : "shutdown -h now",
+      "shutdown_timeout" : "10s",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "root",
+      "type": "virtualbox",
+      "virtualbox_version_file": "/tmp/.vbox_version"
+    }
+  ],
+  "post-processors" : [
+    {
+      "type" : "vagrant",
+      "virtualbox" : {}
+    }
+  ]
+}

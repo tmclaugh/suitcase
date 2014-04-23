@@ -1,0 +1,25 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<esc>",
+        " linux ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg",
+        "<enter>",
+        "<wait>"
+      ],
+      "type": "virtualbox-iso",
+      "guest_os_type": "RedHat_64",
+      "iso_url": "http://mirrors.bluehost.com/centos/6.5/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+      "iso_checksum_type": "md5",
+      "ssh_username": "root",
+      "ssh_password": "vagrant",
+      "ssh_wait_timeout": "20m",
+      "shutdown_timeout" : "15s",
+      "shutdown_command": "shutdown -h now",
+      "http_directory": "."
+    }
+  ],
+  "provisioners": [],
+  "post-processors": ["vagrant"]
+}

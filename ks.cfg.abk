@@ -1,0 +1,66 @@
+
+
+
+network --onboot yes --device eth0 --bootproto dhcp --noipv6
+
+
+bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet"
+
+part /boot --fstype=ext3 --size=256
+part pv.01 --size=20480
+volgroup vg_root pv.01
+logvol swap --fstype swap --name=lv_swap --vgname=vg_root --size=1024
+logvol / --fstype=ext4 --name=lv_root --vgname=vg_root --size=1024 --grow
+
+
+# rootpw is vagrant
+
+firewall --disabled
+selinux --permissive
+
+
+shutdown
+
+%packages
+@core
+%end
+
+%post
+
+# Turn ntpd and sync
+chkconfig ntpd on
+service ntpd stop
+ntpdate time.nist.gov
+service ntpd start
+
+chkconfig sshd on
+chkconfig iptables off
+
+useradd vagrant
+
+mkdir -m 0700 -p /home/vagrant/.ssh
+
+curl https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub >> /home/vagrant/.ssh/authorized_keys
+
+chmod 600 /home/vagrant/.ssh/authorized_keys
+chown -R vagrant:vagrant /home/vagrant/.ssh
+
+sed -i 's/^.*requiretty/#Defaults requiretty/' /etc/sudoers
+
+echo "vagrant ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+cat << EOF1 > /etc/sysconfig/network-scripts/ifcfg-eth0
+DEVICE=eth0
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=no
+BOOTPROTO=dhcp
+EOF1
+
+rm -f /etc/udev/rules.d/70-persistent-net.rules
+
+yum install -y vim man openssh-clients git wget
+
+yum clean all
+
+history -c
