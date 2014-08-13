@@ -1,0 +1,4 @@
+# Ignore build related directories.
+images
+output
+packer_cache

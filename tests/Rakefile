@@ -1,0 +1,27 @@
+require 'rake'
+require 'rspec/core/rake_task'
+
+task :common do
+  puts "Testing common"
+  RSpec::Core::RakeTask.new(:common) do |t|
+    t.pattern = 'spec/common/*_spec.rb'
+    t.rspec_opts = '-f documentation'
+  end
+end
+
+task :platform => :common do |t, args|
+  if ENV['IMAGE_TYPE']
+    image_type = ENV['IMAGE_TYPE']
+  end
+
+  puts "Testing #{image_type}"
+  RSpec::Core::RakeTask.new(:platform) do |t|
+    t.pattern = ["spec/#{image_type}/*_spec.rb"]
+
+    # We have a set of common tests for aws.
+    if ENV['AWS_TYPE'] != ''
+      t.pattern << "spec/aws/*_spec.rb"
+    end
+    t.rspec_opts = '-f documentation'
+  end
+end

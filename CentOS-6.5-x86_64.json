@@ -1,0 +1,10 @@
+{
+  "vm_name"           : "CentOS-6.5-x86_64",
+  "os_version"        : "6.5",
+  "ks"                : "CentOS-6.5-x86_64.ks",
+  "headless"          : "true",
+  "iso_url"           : "http://centos.mirrors.tds.net/pub/linux/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
+  "iso_checksum"      : "f9d84907d77df62017944cb23cab66305e94ee6ae6c1126415b81cc5e999bdd0",
+  "iso_checksum_type" : "sha256",
+  "user"              : "root"
+}

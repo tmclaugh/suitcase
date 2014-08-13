@@ -1,0 +1,85 @@
+{
+  "variables":
+  {
+    "vm_name"           : "",
+    "timestamp"         : "{{ timestamp }}",
+    "os_version"        : "",
+    "ks"                : "",
+    "headless"          : "",
+    "iso_url"           : "",
+    "iso_checksum"      : "",
+    "iso_checksum_type" : "",
+    "user"              : ""
+  },
+
+  "builders":
+  [
+    {
+      "type"                 : "virtualbox-iso",
+      "boot_command":
+      [
+        "<esc>",
+        " linux ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks/{{user `ks`}}",
+        "<enter>",
+        "<wait>"
+      ],
+      "boot_wait"            : "5s",
+      "http_directory"       : ".",
+      "guest_os_type"        : "RedHat_64",
+      "disk_size"            : "10000",
+      "guest_additions_path" : "/tmp/VBoxGuestAdditions.iso",
+      "hard_drive_interface" : "sata",
+      "headless"             : "{{user `headless`}}",
+      "iso_url"              : "{{user `iso_url`}}",
+      "iso_checksum"         : "{{user `iso_checksum`}}",
+      "iso_checksum_type"    : "{{user `iso_checksum_type`}}",
+      "output_directory"     : "images/master/{{user `vm_name`}}-{{user `timestamp`}}",
+      "ssh_username"         : "root",
+      "ssh_key_path"         : "files/hsimage_root_rsa",
+      "ssh_wait_timeout"     : "30m",
+      "shutdown_timeout"     : "15s",
+      "shutdown_command"     : "/sbin/halt -p",
+      "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}",
+      "vboxmanage"           :
+      [
+        [ "modifyvm", "{{.Name}}", "--memory", "1024" ]
+      ]
+    }
+  ],
+
+  "provisioners":
+  [
+    {
+      "type"             : "shell",
+      "environment_vars" :
+      [
+        "vm_name={{user `vm_name`}}-{{user `timestamp`}}",
+        "kickstart={{user `ks`}}",
+        "os_version={{user `os_version`}}"
+      ],
+      "scripts" :
+      [
+        "scripts/common/pre-state.sh",
+        "scripts/virtualbox/cloud-init-config.sh",
+        "scripts/virtualbox/dns.sh",
+        "scripts/virtualbox/grub.sh",
+        "scripts/virtualbox/motd_version.sh",
+        "scripts/virtualbox/nscd.sh",
+        "scripts/virtualbox/rpmgpg.sh",
+        "scripts/virtualbox/packages.sh",
+        "scripts/virtualbox/serial.sh",
+        "scripts/virtualbox/sshd.sh",
+        "scripts/common/nic.sh"
+      ]
+    },
+    {
+      "type"       : "file",
+      "source"     : "tests",
+      "destination": "/tmp"
+    },
+    {
+      "type"   : "shell",
+      "script" : "tests/serverspec.sh"
+    }
+  ]
+}

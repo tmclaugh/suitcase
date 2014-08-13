@@ -1,0 +1,71 @@
+{
+  "variables":
+  {
+    "vm_name"           : "",
+    "timestamp"         : "{{ timestamp }}",
+    "os_version"        : "",
+    "ks"                : "",
+    "headless"          : "",
+    "iso_url"           : "",
+    "iso_checksum"      : "",
+    "iso_checksum_type" : "",
+    "user"              : "",
+    "image_type"        : "vagrant"
+  },
+
+  "builders":
+  [
+    {
+      "type"                 : "virtualbox-ovf",
+      "boot_wait"            : "5s",
+      "headless"             : "{{user `headless`}}",
+      "output_directory"     : "images/{{user `image_type`}}/{{user `vm_name`}}-{{user `timestamp`}}",
+      "shutdown_timeout"     : "15s",
+      "shutdown_command"     : "/sbin/halt -p",
+      "source_path"          : "images/master/{{user `vm_name`}}-{{user `timestamp`}}/{{user `vm_name`}}-{{user `timestamp`}}.ovf",
+      "ssh_username"         : "root",
+      "ssh_key_path"         : "files/hsimage_root_rsa",
+      "ssh_wait_timeout"     : "20m",
+      "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}-{{user `image_type`}}"
+    }
+  ],
+
+  "provisioners":
+  [
+    {
+      "type"    : "shell",
+      "environment_vars" :
+      [
+        "os_version={{user `os_version`}}"
+      ],
+      "scripts" :
+      [
+        "scripts/vagrant/vbox-guest-additions.sh",
+        "scripts/vagrant/vagrant-user.sh",
+        "scripts/common/nic.sh",
+        "scripts/common/cleanup.sh"
+      ]
+    },
+    {
+      "type"        : "file",
+      "source"      : "tests",
+      "destination" : "/tmp"
+    },
+    {
+      "type"             : "shell",
+      "environment_vars" :
+      [
+        "IMAGE_TYPE={{user `image_type`}}"
+      ],
+      "script"           : "tests/serverspec.sh"
+    }
+  ],
+
+  "post-processors":
+  [
+    {
+      "type"   : "vagrant",
+      "output" : "images/{{user `image_type`}}/{{user `vm_name`}}-{{ user `timestamp`}}.box"
+    }
+  ]
+}
