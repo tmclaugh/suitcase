@@ -1,5 +1,7 @@
 # Rakefile around our Packer build
 
+load "./site.rb"
+
 MASTER_DIR  = 'images/master'
 AWS_HVM_DIR = 'images/aws-hvm'
 AWS_PV_DIR  = 'images/aws-paravirt'
@@ -10,14 +12,10 @@ AWS_PV_TMPL  = 'image-templates/aws-paravirt.json'
 MASTER_TMPL  = 'image-templates/virtualbox.json'
 VAGRANT_TMPL = 'image-templates/vagrant.json'
 
-S3_BUCKET  = 's3://straycat.dhs.org'
 S3_MASTER  = "#{S3_BUCKET}/master"
 S3_VAGRANT = "#{S3_BUCKET}/vagrant"
 S3_AWS_HVM = "#{S3_BUCKET}/aws-hvm"
 S3_AWS_PV  = "#{S3_BUCKET}/aws-pv"
-
-PROD_ACCOUNTNUM = "591511214639"
-PROD_BUCKET     = "os-images"
 
 if RUBY_PLATFORM =~ /.*darwin.*/
   packer_cmd = '/usr/local/bin/packer'
