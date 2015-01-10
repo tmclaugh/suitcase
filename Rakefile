@@ -119,7 +119,7 @@ namespace :packer do
   desc "Upload master image"
   task :upload_master => :build_master do
     unless FileUtils.uptodate?("#{master_upload_done}", ["#{master_image}"])
-      sh %{aws s3 cp --recursive #{File.dirname("#{master_image}")} #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{master_image}")} #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
       FileUtils.touch("#{master_upload_done}")
     end
   end
@@ -152,7 +152,7 @@ namespace :packer do
   desc "Upload Vagrant image"
   task :upload_vagrant => :build_vagrant do
     unless FileUtils.uptodate?("#{vagrant_upload_done}", ["#{vagrant_image}"])
-      sh %{aws s3 cp #{vagrant_image} #{S3_VAGRANT}/}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp #{vagrant_image} #{S3_VAGRANT}/}
       FileUtils.touch("#{vagrant_upload_done}")
     end
   end
@@ -185,7 +185,7 @@ namespace :packer do
   desc "Upload AWS HVM image"
   task :upload_awshvm => :build_awshvm do
     unless FileUtils.uptodate?("#{aws_hvm_upload_done}", ["#{aws_hvm_image}"])
-      sh %{aws s3 cp --recursive #{File.dirname("#{aws_hvm_image}")} #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{aws_hvm_image}")} #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
       FileUtils.touch("#{aws_hvm_upload_done}")
     end
   end
@@ -242,7 +242,7 @@ namespace :packer do
   desc "Upload AWS paravirt image"
   task :upload_awspv => :build_awspv do
     unless FileUtils.uptodate?("#{aws_pv_upload_done}", ["#{aws_pv_image}"])
-      sh %{aws s3 cp --recursive #{File.dirname("#{aws_pv_image}")} #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{aws_pv_image}")} #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
       FileUtils.touch("#{aws_pv_upload_done}")
     end
   end
