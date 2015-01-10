@@ -2,3 +2,6 @@
 images
 output
 packer_cache
+
+# Ignore site setup.
+site.rb
