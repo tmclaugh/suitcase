@@ -98,6 +98,15 @@ namespace :packer do
 
   task :fake_upload_all => ['fake_upload_master', 'fake_upload_vagrant', 'fake_upload_awshvm', 'fake_upload_awspv']
 
+  desc "Fetch images"
+  task :fetch, [:image] do |t, args|
+    args.with_defaults(:image => :all)
+    image = args[:image]
+    Rake::Task["packer:fetch_#{image}"].invoke
+  end
+
+  task :fetch_all => ['fetch_master', 'fetch_vagrant', 'fetch_awshvm', 'fetch_awspv']
+
   desc "Register images"
   task :register, [:image] do |t, args|
     args.with_defaults(:image => :all)
@@ -132,6 +141,13 @@ namespace :packer do
   desc "Register master image (NOOP procedure)"
   task :register_master => :upload_master
 
+  desc "Fetch master image"
+  task :fetch_master do
+    unless File.exist?("#{master_image}")
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))} #{File.dirname("#{master_image}")}}
+    end
+  end
+
   desc "Cleanup master image"
   task :clean_master do
     if File.exist?("#{master_image}")
@@ -164,6 +180,13 @@ namespace :packer do
 
   desc "Register Vagrant image (NOOP procedure)"
   task :register_vagrant => :upload_vagrant
+
+  desc "Fetch vagrant image"
+  task :fetch_vagrant do
+    unless File.exist?("#{vagrant_image}")
+      sh %{aws --profile #{AWS_PROFILE} s3 cp #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")} #{File.dirname("#{vagrant_image}")}}
+    end
+  end
 
   desc "Cleanup Vagrant"
   task :clean_vagrant do
@@ -213,6 +236,13 @@ namespace :packer do
     sh %{sh files/registerami.sh -s -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
   end
 
+  desc "Fetch AWS HVM image"
+  task :fetch_awshvm do
+    unless File.exist?("#{aws_hvm_image}")
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))} #{File.dirname("#{aws_hvm_image}")}}
+    end
+  end
+
   desc "Cleanup AWS HVM image"
   task :clean_awshvm do
     if File.exists?("#{aws_hvm_image}")
@@ -255,6 +285,13 @@ namespace :packer do
   desc "Register AWS paravirt image"
   task :register_awspv => :upload_awspv do
     sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+  end
+
+  desc "Fetch AWS paravirt image"
+  task :fetch_awspv do
+    unless File.exist?("#{aws_pv_image}")
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))} #{File.dirname("#{aws_pv_image}")}}
+    end
   end
 
   desc "Cleanup AWS paravirt image"
