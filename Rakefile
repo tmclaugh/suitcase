@@ -228,7 +228,7 @@ namespace :packer do
 
   desc "Delete Vagrant image from S3"
   task :delete_vagrant do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_VAGRANT}/#{File.basename(File.dirname("#{vagrant_image}"))}}
+    sh %{aws --profile #{AWS_PROFILE} s3 rm #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")}}
   end
 
 
