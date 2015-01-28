@@ -255,7 +255,7 @@ namespace :packer do
 
   desc "Register AWS HVM with SR-IOV support"
   task :register_awshvm => :upload_awshvm do
-    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_HVM.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
     sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output table --query 'Images[*][ImageId, Name]' }
   end
 
@@ -311,7 +311,7 @@ namespace :packer do
 
   desc "Register AWS paravirt image"
   task :register_awspv => :upload_awspv do
-    sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+    sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_PV.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
     sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output table --query 'Images[*][ImageId, Name]' }
   end
 
