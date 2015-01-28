@@ -116,6 +116,16 @@ namespace :packer do
 
   task :register_all => ['register_master', 'register_vagrant', 'register_awshvm', 'register_awspv']
 
+  desc "Delete images from S3"
+  task :delete, [:image] do |t, args|
+    args.with_defaults(:image => :all)
+    image = args[:image]
+    Rake::Task["packer:delete_#{image}"].invoke
+  end
+
+  task :delete_all => ['delete_master', 'delete_vagrant', 'delete_awshvm', 'delete_awspv']
+
+
 
   # Master image related tasks.
   desc "Build master image"
@@ -156,6 +166,11 @@ namespace :packer do
     end
   end
 
+  desc "Delete master image from S3"
+  task :delete_master do
+    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
+  end
+
 
   # Vagrant related tasks
   desc "Build Vagrant"
@@ -194,6 +209,11 @@ namespace :packer do
       File.delete("#{vagrant_image}")
       File.delete("#{vagrant_upload_done}")
     end
+  end
+
+  desc "Delete Vagrant image from S3"
+  task :delete_vagrant do
+    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_VAGRANT}/#{File.basename(File.dirname("#{vagrant_image}"))}}
   end
 
 
@@ -238,6 +258,11 @@ namespace :packer do
     end
   end
 
+  desc "Delete AWS HVM image from S3"
+  task :delete_awshvm do
+    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+  end
+
 
   # AWS PV related tasks
   desc "Build AWS paravirt"
@@ -279,4 +304,11 @@ namespace :packer do
       FileUtils.rm_rf(File.dirname("#{aws_pv_image}"))
     end
   end
+
+  desc "Delete AWS paravirt image from S3"
+  task :delete_awspv do
+    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+  end
+
+
 end
