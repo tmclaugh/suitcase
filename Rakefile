@@ -116,7 +116,16 @@ namespace :packer do
 
   task :register_all => ['register_master', 'register_vagrant', 'register_awshvm', 'register_awspv']
 
-  desc "Delete images from S3"
+  desc "Deregister images"
+  task :deregister, [:image] do |t, args|
+    args.with_defaults(:image => :all)
+    image = args[:image]
+    Rake::Task["packer:deregister_#{image}"].invoke
+  end
+
+  task :deregister_all => ['deregister_master', 'deregister_vagrant', 'deregister_awshvm', 'deregister_awspv']
+
+    desc "Delete images from S3"
   task :delete, [:image] do |t, args|
     args.with_defaults(:image => :all)
     image = args[:image]
@@ -150,6 +159,9 @@ namespace :packer do
 
   desc "Register master image (NOOP procedure)"
   task :register_master => :upload_master
+
+  desc "Deregister master image (NOOP procedure)"
+  task :deregister_master
 
   desc "Fetch master image"
   task :fetch_master do
@@ -195,6 +207,9 @@ namespace :packer do
 
   desc "Register Vagrant image (NOOP procedure)"
   task :register_vagrant => :upload_vagrant
+
+  desc "Deregister vagrant image (NOOP procedure)"
+  task :deregister_vagrant
 
   desc "Fetch vagrant image"
   task :fetch_vagrant do
@@ -244,6 +259,14 @@ namespace :packer do
     sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output table --query 'Images[*][ImageId, Name]' }
   end
 
+  desc "Deregister AWS HVM image"
+  task :deregister_awshvm do
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]'}
+    if ami_id != ''
+      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+    end
+  end
+
   desc "Fetch AWS HVM image"
   task :fetch_awshvm do
     unless File.exist?("#{aws_hvm_image}")
@@ -290,6 +313,14 @@ namespace :packer do
   task :register_awspv => :upload_awspv do
     sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
     sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output table --query 'Images[*][ImageId, Name]' }
+  end
+
+  desc "Deregister AWS paravirt image"
+  task :deregister_awspv do
+    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    if ami_id != ''
+      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+    end
   end
 
   desc "Fetch AWS paravirt image"
