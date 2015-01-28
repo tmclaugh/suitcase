@@ -132,7 +132,7 @@ namespace :packer do
     Rake::Task["packer:delete_#{image}"].invoke
   end
 
-  task :delete_all => ['delete_master', 'delete_vagrant', 'delete_awshvm', 'delete_awspv']
+  task :delete_all => ['delete_awshvm', 'delete_awspv', 'delete_master', 'delete_vagrant']
 
 
 
@@ -284,7 +284,12 @@ namespace :packer do
 
   desc "Delete AWS HVM image from S3"
   task :delete_awshvm do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]' }
+    if ami_id == ''
+      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+    else
+      abort "ERROR: Must degregister associated AMI first. #{ami_id}"
+    end
   end
 
 
@@ -340,8 +345,12 @@ namespace :packer do
 
   desc "Delete AWS paravirt image from S3"
   task :delete_awspv do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    if ami_id == ''
+      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+    else
+      abort "ERROR: Must degregister associated AMI first. #{ami_id}"
+    end
   end
-
 
 end
