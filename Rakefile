@@ -317,7 +317,7 @@ namespace :packer do
 
   desc "Deregister AWS paravirt image"
   task :deregister_awspv do
-    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
     if ami_id != ''
       sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
     end
