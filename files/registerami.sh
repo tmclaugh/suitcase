@@ -8,7 +8,7 @@
 DEFAULT_KERNEL="aki-919dcaf8" # PV-GRUB
 SRIOV_ARG=''
 
-while getopts "a:b:i:t:s" opt; do
+while getopts "a:b:i:t:" opt; do
     case $opt in
         a)
             ACCOUNTNUM=$OPTARG
@@ -21,9 +21,6 @@ while getopts "a:b:i:t:s" opt; do
             ;;
         t)
             VIRT_TYPE=$OPTARG
-            ;;
-        s)
-            SRIOV_ARG='--sriov simple'
             ;;
         *)
             echo "Invalid option: $opt"
@@ -52,10 +49,6 @@ fi
 IMAGE_DIR=$(dirname $IMAGE_FILE_VB)
 IMAGE_FILE=$(echo $IMAGE_FILE_VB | sed 's/-disk1.vmdk/.img/')
 IMAGE_NAME=$(echo $(basename $IMAGE_FILE_VB) | sed 's/-disk1.vmdk//')
-if [ "$SRIOV_ARG" != '' ]; then
-    IMAGE_NAME="${IMAGE_NAME}-sriov"
-fi
-
 
 # Make sure we have login creds for EC2
 SETUP_PASS=1
@@ -141,7 +134,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-ec2-register $SRIOV_ARG -O $AWS_ACCESS_KEY -W $AWS_SECRET_KEY -n ${IMAGE_NAME} -d ${IMAGE_NAME} ${BUCKET}/${IMAGE_NAME}.manifest.xml $VIRT_ARGS
+ec2-register --sriov simple -O $AWS_ACCESS_KEY -W $AWS_SECRET_KEY -n ${IMAGE_NAME} -d ${IMAGE_NAME} ${BUCKET}/${IMAGE_NAME}.manifest.xml $VIRT_ARGS
 
 if [ $? -ne 0 ]; then
     echo "Registration failed!"

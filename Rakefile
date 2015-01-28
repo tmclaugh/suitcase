@@ -218,22 +218,9 @@ namespace :packer do
     FileUtils.touch("#{aws_hvm_upload_done}")
   end
 
-  # FIXME: Once we're comfortable with SR-IOV we could probably just use
-  # that everywhere supported.
-  desc "Register AWS HVM image"
-  task :register_awshvm => :upload_awshvm do
-    Rake::Task["packer:register_awshvm_reg"].invoke
-    Rake::Task["packer:register_awshvm_sriov"].invoke
-  end
-
-  desc "Register AWS HVM image"
-  task :register_awshvm_reg => :upload_awshvm do
-    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
-  end
-
   desc "Register AWS HVM with SR-IOV support"
-  task :register_awshvm_sriov => :upload_awshvm do
-    sh %{sh files/registerami.sh -s -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+  task :register_awshvm => :upload_awshvm do
+    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
   end
 
   desc "Fetch AWS HVM image"
