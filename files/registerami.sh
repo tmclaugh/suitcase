@@ -124,7 +124,7 @@ fi
 TEMPDIR=`mktemp -d /tmp/tmp.XXXXXXXXXX`
 
 ec2-bundle-image -c $EC2_CERT -k $EC2_PRIVATE_KEY -u $ACCOUNTNUM -i $IMAGE_FILE -d $TEMPDIR -p ${IMAGE_NAME} -r x86_64
-ec2-upload-bundle --retry -b $BUCKET -a $AWS_ACCESS_KEY -s $AWS_SECRET_KEY -m ${TEMPDIR}/${IMAGE_NAME}.manifest.xml
+ec2-upload-bundle --retry -b $BUCKET/${IMAGE_NAME} -a $AWS_ACCESS_KEY -s $AWS_SECRET_KEY -m ${TEMPDIR}/${IMAGE_NAME}.manifest.xml
 if [ $? -ne 0 ]; then
     echo "Image upload failed!"
 
@@ -134,7 +134,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-ec2-register --sriov simple -O $AWS_ACCESS_KEY -W $AWS_SECRET_KEY -n ${IMAGE_NAME} -d ${IMAGE_NAME} ${BUCKET}/${IMAGE_NAME}.manifest.xml $VIRT_ARGS
+ec2-register --sriov simple -O $AWS_ACCESS_KEY -W $AWS_SECRET_KEY -n ${IMAGE_NAME} -d ${IMAGE_NAME} ${BUCKET}/${IMAGE_NAME}/${IMAGE_NAME}.manifest.xml $VIRT_ARGS
 
 if [ $? -ne 0 ]; then
     echo "Registration failed!"
