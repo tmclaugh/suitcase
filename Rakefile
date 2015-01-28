@@ -239,15 +239,6 @@ namespace :packer do
   end
 
 
-  desc "Cleanup AWS HVM image"
-  task :clean_awshvm do
-    if File.exists?("#{aws_hvm_image}")
-      sh %{VBoxManage closemedium disk #{aws_hvm_image} --delete}
-      FileUtils.rm_rf(File.dirname("#{aws_hvm_image}"))
-    end
-  end
-
-
   # AWS PV related tasks
   desc "Build AWS paravirt"
   task :build_awspv => "#{aws_pv_image}"
