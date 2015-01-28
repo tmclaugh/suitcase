@@ -116,14 +116,23 @@ namespace :packer do
 
   task :register_all => ['register_master', 'register_vagrant', 'register_awshvm', 'register_awspv']
 
-  desc "Delete images from S3"
+  desc "Deregister images"
+  task :deregister, [:image] do |t, args|
+    args.with_defaults(:image => :all)
+    image = args[:image]
+    Rake::Task["packer:deregister_#{image}"].invoke
+  end
+
+  task :deregister_all => ['deregister_master', 'deregister_vagrant', 'deregister_awshvm', 'deregister_awspv']
+
+    desc "Delete images from S3"
   task :delete, [:image] do |t, args|
     args.with_defaults(:image => :all)
     image = args[:image]
     Rake::Task["packer:delete_#{image}"].invoke
   end
 
-  task :delete_all => ['delete_master', 'delete_vagrant', 'delete_awshvm', 'delete_awspv']
+  task :delete_all => ['delete_awshvm', 'delete_awspv', 'delete_master', 'delete_vagrant']
 
 
 
@@ -150,6 +159,9 @@ namespace :packer do
 
   desc "Register master image (NOOP procedure)"
   task :register_master => :upload_master
+
+  desc "Deregister master image (NOOP procedure)"
+  task :deregister_master
 
   desc "Fetch master image"
   task :fetch_master do
@@ -196,6 +208,9 @@ namespace :packer do
   desc "Register Vagrant image (NOOP procedure)"
   task :register_vagrant => :upload_vagrant
 
+  desc "Deregister vagrant image (NOOP procedure)"
+  task :deregister_vagrant
+
   desc "Fetch vagrant image"
   task :fetch_vagrant do
     unless File.exist?("#{vagrant_image}")
@@ -213,7 +228,7 @@ namespace :packer do
 
   desc "Delete Vagrant image from S3"
   task :delete_vagrant do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_VAGRANT}/#{File.basename(File.dirname("#{vagrant_image}"))}}
+    sh %{aws --profile #{AWS_PROFILE} s3 rm #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")}}
   end
 
 
@@ -240,13 +255,22 @@ namespace :packer do
 
   desc "Register AWS HVM with SR-IOV support"
   task :register_awshvm => :upload_awshvm do
-    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+    sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_HVM.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_hvm_image}"))}/ami}
+    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output table --query 'Images[*][ImageId, Name]' }
+  end
+
+  desc "Deregister AWS HVM image"
+  task :deregister_awshvm do
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]'}
+    if ami_id != ''
+      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+    end
   end
 
   desc "Fetch AWS HVM image"
   task :fetch_awshvm do
     unless File.exist?("#{aws_hvm_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))} #{File.dirname("#{aws_hvm_image}")}}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive --exclude ami/* #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))} #{File.dirname("#{aws_hvm_image}")}}
     end
   end
 
@@ -260,7 +284,12 @@ namespace :packer do
 
   desc "Delete AWS HVM image from S3"
   task :delete_awshvm do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]' }
+    if ami_id == ''
+      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+    else
+      abort "ERROR: Must degregister associated AMI first. #{ami_id}"
+    end
   end
 
 
@@ -287,13 +316,22 @@ namespace :packer do
 
   desc "Register AWS paravirt image"
   task :register_awspv => :upload_awspv do
-    sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{PROD_BUCKET}}
+    sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_PV.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_pv_image}"))}/ami}
+    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output table --query 'Images[*][ImageId, Name]' }
+  end
+
+  desc "Deregister AWS paravirt image"
+  task :deregister_awspv do
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    if ami_id != ''
+      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+    end
   end
 
   desc "Fetch AWS paravirt image"
   task :fetch_awspv do
     unless File.exist?("#{aws_pv_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))} #{File.dirname("#{aws_pv_image}")}}
+      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive --exclude ami/* #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))} #{File.dirname("#{aws_pv_image}")}}
     end
   end
 
@@ -307,8 +345,12 @@ namespace :packer do
 
   desc "Delete AWS paravirt image from S3"
   task :delete_awspv do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    if ami_id == ''
+      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+    else
+      abort "ERROR: Must degregister associated AMI first. #{ami_id}"
+    end
   end
-
 
 end
