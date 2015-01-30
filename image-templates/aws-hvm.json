@@ -20,6 +20,7 @@
       "type"                 : "virtualbox-ovf",
       "boot_wait"            : "5s",
       "headless"             : "{{user `headless`}}",
+      "guest_additions_path" : "/tmp/VBoxGuestAdditions.iso",
       "output_directory"     : "images/{{user `image_type`}}/{{user `vm_name`}}-{{user `timestamp`}}",
       "shutdown_timeout"     : "15s",
       "shutdown_command"     : "/sbin/halt -p",
