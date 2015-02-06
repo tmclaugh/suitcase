@@ -2,6 +2,7 @@
 
 # Set to publicly accesible nameserver
 /bin/echo nameserver 8.8.8.8 > /etc/resolv.conf
+/bin/echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
 # Make sure that DNS does not get updated by AWS.
 sed -i -e 's/\(PEERDNS\)=yes/\1=no/' /etc/sysconfig/network-scripts/ifcfg-*
