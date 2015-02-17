@@ -29,7 +29,7 @@ $ brew install files/ec2-ami-tools.rb
 </pre>
 
 ## Process
-Suitcase uses a Rakefile to drive all Packer atcions.  The commands should be reasonably simple and intuitive.  All regularly needed actions can be achieved using the following tasks.  The optional _image_ argument is the name can be used to limit tasks to those for a particular image.  Without an image argument all images will have the specified action taken.  All actions require an _os_ argument (ex. os=CentOS-6.5-x86_64.json) to indicate the os template to be used.  A _timesstamp_ argument can optionally be supplied (ex. timestamp=201410031342).  The _timestamp_ is used to continue previous builds.
+Suitcase uses a Rakefile to drive all Packer actions.  The commands should be reasonably simple and intuitive.  All regularly needed actions can be achieved using the following tasks.  The optional _image_ argument is the name can be used to limit tasks to those for a particular image.  Without an image argument all images will have the specified action taken.  All actions require an _os_ argument (ex. os=CentOS-6.5-x86_64.json) to indicate the os template to be used.  A _timesstamp_ argument can optionally be supplied (ex. timestamp=201410031342).  The _timestamp_ is used to continue previous builds.
 
 * rake packer:build[image]
     * Build an image artifact
