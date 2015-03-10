@@ -4,8 +4,9 @@ require 'formula'
 
 class Ec2AmiTools < AmazonWebServicesFormula
 
-  homepage 'https://git.hubteam.com/tmclaughlin/ec2-ami-tools'
-  url 'git@git.hubteam.com:tmclaughlin/ec2-ami-tools.git', :using => :git
+  homepage 'https://github.com/Jana-Mobile/ec2-ami-tools'
+  url 'git@github.com:Jana-Mobile/ec2-ami-tools.git', :using => :git
+  sha1 'ami_unbundle_support'
 
   def install
     standard_install
