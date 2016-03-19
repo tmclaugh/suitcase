@@ -25,7 +25,7 @@
       "shutdown_command"     : "/sbin/halt -p",
       "source_path"          : "images/master/{{user `vm_name`}}-{{user `timestamp`}}/{{user `vm_name`}}-{{user `timestamp`}}.ovf",
       "ssh_username"         : "root",
-      "ssh_key_path"         : "files/hsimage_root_rsa",
+      "ssh_private_key_file" : "files/hsimage_root_rsa",
       "ssh_wait_timeout"     : "20m",
       "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}-{{user `image_type`}}"
     }
