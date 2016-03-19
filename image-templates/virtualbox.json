@@ -27,7 +27,7 @@
       "http_directory"       : ".",
       "guest_os_type"        : "RedHat_64",
       "disk_size"            : "10000",
-      "guest_additions_path" : "/tmp/VBoxGuestAdditions.iso",
+      "guest_additions_mode" : "disable",
       "hard_drive_interface" : "sata",
       "headless"             : "{{user `headless`}}",
       "iso_url"              : "{{user `iso_url`}}",
