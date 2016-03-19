@@ -35,7 +35,7 @@
       "iso_checksum_type"    : "{{user `iso_checksum_type`}}",
       "output_directory"     : "images/master/{{user `vm_name`}}-{{user `timestamp`}}",
       "ssh_username"         : "root",
-      "ssh_key_path"         : "files/hsimage_root_rsa",
+      "ssh_private_key_file" : "files/hsimage_root_rsa",
       "ssh_wait_timeout"     : "30m",
       "shutdown_timeout"     : "15s",
       "shutdown_command"     : "/sbin/halt -p",
