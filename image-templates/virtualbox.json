@@ -37,6 +37,7 @@
       "ssh_username"         : "root",
       "ssh_private_key_file" : "files/hsimage_root_rsa",
       "ssh_wait_timeout"     : "30m",
+      "ssh_pty"              : "true",
       "shutdown_timeout"     : "15s",
       "shutdown_command"     : "/sbin/halt -p",
       "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}",

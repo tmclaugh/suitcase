@@ -28,6 +28,7 @@
       "ssh_username"         : "root",
       "ssh_private_key_file" : "files/hsimage_root_rsa",
       "ssh_wait_timeout"     : "20m",
+      "ssh_pty"				 : "true",
       "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}-{{user `image_type`}}"
     }
   ],
