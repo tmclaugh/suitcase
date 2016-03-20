@@ -1,6 +1,8 @@
 # Ensure any required services here.
 require 'spec_helper'
 
-describe service('nscd') do
-  it { should be_enabled }
+if os[:family] != 'RedHat7'
+  describe service('nscd') do
+    it { should be_enabled }
+  end
 end
