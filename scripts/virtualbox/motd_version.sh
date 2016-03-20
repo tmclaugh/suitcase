@@ -15,7 +15,7 @@ echo " (base image, $vm_name / $kickstart)"         >> /etc/motd
 echo "" >> /etc/motd
 echo "" >> /etc/motd
 
-cat >> /etc/straycat-base-image << EOF
+cat >> /etc/site-base-image << EOF
 
 $vm_name
 

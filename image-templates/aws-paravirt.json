@@ -20,14 +20,15 @@
       "type"                 : "virtualbox-ovf",
       "boot_wait"            : "5s",
       "headless"             : "{{user `headless`}}",
-      "guest_additions_path" : "/tmp/VBoxGuestAdditions.iso",
+      "guest_additions_mode" : "disable",
       "output_directory"     : "images/{{user `image_type`}}/{{user `vm_name`}}-{{user `timestamp`}}",
       "shutdown_timeout"     : "15s",
       "shutdown_command"     : "/sbin/halt -p",
       "source_path"          : "images/master/{{user `vm_name`}}-{{user `timestamp`}}/{{user `vm_name`}}-{{user `timestamp`}}.ovf",
       "ssh_username"         : "root",
-      "ssh_key_path"         : "files/hsimage_root_rsa",
+      "ssh_private_key_file" : "files/hsimage_root_rsa",
       "ssh_wait_timeout"     : "20m",
+      "ssh_pty"              : "true",
       "vm_name"              : "{{user `vm_name`}}-{{user `timestamp`}}-{{user `image_type`}}"
     }
   ],

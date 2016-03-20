@@ -147,7 +147,7 @@ namespace :packer do
   desc "Upload master image"
   task :upload_master => :build_master do
     unless FileUtils.uptodate?("#{master_upload_done}", ["#{master_image}"])
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{master_image}")} #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
+      sh %{aws s3 cp --recursive #{File.dirname("#{master_image}")} #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
       FileUtils.touch("#{master_upload_done}")
     end
   end
@@ -166,7 +166,7 @@ namespace :packer do
   desc "Fetch master image"
   task :fetch_master do
     unless File.exist?("#{master_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))} #{File.dirname("#{master_image}")}}
+      sh %{aws s3 cp --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))} #{File.dirname("#{master_image}")}}
     end
   end
 
@@ -180,7 +180,7 @@ namespace :packer do
 
   desc "Delete master image from S3"
   task :delete_master do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
+    sh %{aws s3 rm --recursive #{S3_MASTER}/#{File.basename(File.dirname("#{master_image}"))}}
   end
 
 
@@ -195,7 +195,7 @@ namespace :packer do
   desc "Upload Vagrant image"
   task :upload_vagrant => :build_vagrant do
     unless FileUtils.uptodate?("#{vagrant_upload_done}", ["#{vagrant_image}"])
-      sh %{aws --profile #{AWS_PROFILE} s3 cp #{vagrant_image} #{S3_VAGRANT}/}
+      sh %{aws s3 cp #{vagrant_image} #{S3_VAGRANT}/}
       FileUtils.touch("#{vagrant_upload_done}")
     end
   end
@@ -214,7 +214,7 @@ namespace :packer do
   desc "Fetch vagrant image"
   task :fetch_vagrant do
     unless File.exist?("#{vagrant_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")} #{File.dirname("#{vagrant_image}")}}
+      sh %{aws s3 cp #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")} #{File.dirname("#{vagrant_image}")}}
     end
   end
 
@@ -228,7 +228,7 @@ namespace :packer do
 
   desc "Delete Vagrant image from S3"
   task :delete_vagrant do
-    sh %{aws --profile #{AWS_PROFILE} s3 rm #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")}}
+    sh %{aws s3 rm #{S3_VAGRANT}/#{File.basename("#{vagrant_image}")}}
   end
 
 
@@ -243,7 +243,7 @@ namespace :packer do
   desc "Upload AWS HVM image"
   task :upload_awshvm => :build_awshvm do
     unless FileUtils.uptodate?("#{aws_hvm_upload_done}", ["#{aws_hvm_image}"])
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{aws_hvm_image}")} #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+      sh %{aws s3 cp --recursive #{File.dirname("#{aws_hvm_image}")} #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
       FileUtils.touch("#{aws_hvm_upload_done}")
     end
   end
@@ -256,21 +256,21 @@ namespace :packer do
   desc "Register AWS HVM with SR-IOV support"
   task :register_awshvm => :upload_awshvm do
     sh %{sh files/registerami.sh -i #{aws_hvm_image} -t hvm -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_HVM.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_hvm_image}"))}/ami}
-    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output table --query 'Images[*][ImageId, Name]' }
+    sh %{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output table --query 'Images[*][ImageId, Name]' }
   end
 
   desc "Deregister AWS HVM image"
   task :deregister_awshvm do
-    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]'}
+    ami_id = %x{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]'}
     if ami_id != ''
-      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+      sh %{aws ec2 deregister-image --image-id #{ami_id}}
     end
   end
 
   desc "Fetch AWS HVM image"
   task :fetch_awshvm do
     unless File.exist?("#{aws_hvm_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive --exclude ami/* #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))} #{File.dirname("#{aws_hvm_image}")}}
+      sh %{aws s3 cp --recursive --exclude ami/* #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))} #{File.dirname("#{aws_hvm_image}")}}
     end
   end
 
@@ -284,9 +284,9 @@ namespace :packer do
 
   desc "Delete AWS HVM image from S3"
   task :delete_awshvm do
-    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]' }
+    ami_id = %x{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-hvm --output text --query 'Images[*][ImageId]' }
     if ami_id == ''
-      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
+      sh %{aws s3 rm --recursive #{S3_AWS_HVM}/#{File.basename(File.dirname("#{aws_hvm_image}"))}}
     else
       abort "ERROR: Must degregister associated AMI first. #{ami_id}"
     end
@@ -304,7 +304,7 @@ namespace :packer do
   desc "Upload AWS paravirt image"
   task :upload_awspv => :build_awspv do
     unless FileUtils.uptodate?("#{aws_pv_upload_done}", ["#{aws_pv_image}"])
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive #{File.dirname("#{aws_pv_image}")} #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+      sh %{aws s3 cp --recursive #{File.dirname("#{aws_pv_image}")} #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
       FileUtils.touch("#{aws_pv_upload_done}")
     end
   end
@@ -317,21 +317,21 @@ namespace :packer do
   desc "Register AWS paravirt image"
   task :register_awspv => :upload_awspv do
     sh %{sh files/registerami.sh -i #{aws_pv_image} -t paravirt -a #{PROD_ACCOUNTNUM} -b #{S3_AWS_PV.gsub('s3://', '')}/#{File.basename(File.dirname("#{aws_pv_image}"))}/ami}
-    sh %{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output table --query 'Images[*][ImageId, Name]' }
+    sh %{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output table --query 'Images[*][ImageId, Name]' }
   end
 
   desc "Deregister AWS paravirt image"
   task :deregister_awspv do
-    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    ami_id = %x{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
     if ami_id != ''
-      sh %{aws --profile #{AWS_PROFILE} ec2 deregister-image --image-id #{ami_id}}
+      sh %{aws ec2 deregister-image --image-id #{ami_id}}
     end
   end
 
   desc "Fetch AWS paravirt image"
   task :fetch_awspv do
     unless File.exist?("#{aws_pv_image}")
-      sh %{aws --profile #{AWS_PROFILE} s3 cp --recursive --exclude ami/* #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))} #{File.dirname("#{aws_pv_image}")}}
+      sh %{aws s3 cp --recursive --exclude ami/* #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))} #{File.dirname("#{aws_pv_image}")}}
     end
   end
 
@@ -345,9 +345,9 @@ namespace :packer do
 
   desc "Delete AWS paravirt image from S3"
   task :delete_awspv do
-    ami_id = %x{aws --profile #{AWS_PROFILE} ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
+    ami_id = %x{aws ec2 describe-images --filter Name=name,Values=#{os_name}-#{timestamp}-aws-paravirt --output text --query 'Images[*][ImageId]' }
     if ami_id == ''
-      sh %{aws --profile #{AWS_PROFILE} s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
+      sh %{aws s3 rm --recursive #{S3_AWS_PV}/#{File.basename(File.dirname("#{aws_pv_image}"))}}
     else
       abort "ERROR: Must degregister associated AMI first. #{ami_id}"
     end

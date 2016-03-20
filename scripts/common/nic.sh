@@ -17,6 +17,8 @@ if [ "${os_version::1}" == "7" ]; then
         sed -i -e "s/^DEVICE=.*/DEVICE=eth${i}/" -e "s/^NAME=.*/NAME=eth${i}/" /etc/sysconfig/network-scripts/ifcfg-eth${i}
         i=$(expr $i + 1)
     done
-else
-    rm -f /etc/udev/rules.d/*persistent-net.rules
+fi
+
+if [ -f "/etc/udev/rules.d/70-persistent-net.rules" ]; then
+    rm /etc/udev/rules.d/70-persistent-net.rules
 fi
