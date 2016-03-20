@@ -4,11 +4,11 @@ require 'spec_helper'
 
 if os[:family] == 'RedHat7'
   describe file('/etc/default/grub') do
-    it { should contain /kernel.*elevator=noop/ }
+    its(:content) { should match /kernel.*elevator=noop/ }
   end
 else
   describe file('/boot/grub/grub.conf') do
-    it { should contain /kernel.*elevator=noop/ }
-    it { should contain /kernel.*printk.time=1/ }
+    its(:content) { should match /kernel.*elevator=noop/ }
+    its(:content) { should match /kernel.*printk.time=1/ }
   end
 end

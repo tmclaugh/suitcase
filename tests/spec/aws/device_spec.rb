@@ -3,5 +3,5 @@
 require 'spec_helper'
 
 describe command('lsinitrd') do
-  it { should return_stdout /xen-blkfront.ko/ }
+  its(:stdout) { should match /xen-blkfront.ko/ }
 end
