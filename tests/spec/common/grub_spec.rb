@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-if os[:family] == 'RedHat7'
+if os[:family] == 'redhat' and os[:release] >= '7'
   describe file('/etc/default/grub') do
     its(:content) { should match /kernel.*elevator=noop/ }
   end
