@@ -3,5 +3,5 @@
 require 'spec_helper'
 
 describe file('/etc/ssh/sshd_config') do
-  it { should contain /^PermitRootLogin without-password/ }
+  its(:content) { should match /^PermitRootLogin without-password/ }
 end

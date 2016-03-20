@@ -12,6 +12,6 @@ end
 # around one part of the build.
 if ENV['IMAGE_TYPE'] != nil
   describe command('ip link show eth0') do
-    it { should return_exit_status 0 }
+    its(:exit_status) { should eq 0 }
   end
 end
