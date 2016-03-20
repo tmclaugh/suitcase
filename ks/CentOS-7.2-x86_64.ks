@@ -16,7 +16,7 @@ rootpw --lock --iscrypted $1$0000000000000000000000000000000
 # Add dummy user to keep installer from failing.
 user --name=hsimage --plaintext --password hsimage
 
-bootloader --location=mbr --timeout=1
+bootloader --location=mbr --timeout=1 --append="biosdevname=0 net.ifnames=0"
 network --bootproto=dhcp --device=link --activate --onboot=on
 
 # Partition Information. Change this as necessary
