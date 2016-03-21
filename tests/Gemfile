@@ -1,3 +1,5 @@
 source "https://rubygems.org"
-gem "rake"
+
+gem "net-ssh", "2.9.4"  # Explicitly needed for CentOS 6 compatibility.
+gem "rake", "10.1.1"    # Explicitly needed for CentOS 6 compatibility.
 gem "serverspec", "2.31.0"
