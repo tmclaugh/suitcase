@@ -1,0 +1,10 @@
+{
+  "vm_name"           : "CentOS-7.3-x86_64",
+  "os_version"        : "7.3",
+  "ks"                : "CentOS-7.3-x86_64.ks",
+  "headless"          : "true",
+  "iso_url"           : "http://centos.mirrors.tds.net/pub/linux/centos/7.3.1611/isos/x86_64/CentOS-7-x86_64-Everything-1611.iso",
+  "iso_checksum"      : "af4969ebbdc479d330de97c5bfbb37eedc64c369f009cb15a97f9553ba441c88",
+  "iso_checksum_type" : "sha256",
+  "user"              : "root"
+}
