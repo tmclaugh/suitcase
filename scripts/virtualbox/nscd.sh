@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 # ensure nscd is enabled for boot
 if [ "${os_version::1}" == "7" ]; then
